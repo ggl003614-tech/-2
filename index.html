@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="专业的餐饮店财务管理系统，支持销售、库存、盈亏分析和AI智能分析">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="餐饮管理">
+    <link rel="manifest" href="manifest.json">
+    <title>餐饮店财务管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar">
+            <h1>🍴 餐饮店管理</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="dashboard">📊 仪表盘</a></li>
+                    <li><a href="#" class="nav-link" data-page="sales">💰 销售管理</a></li>
+                    <li><a href="#" class="nav-link" data-page="inventory">📦 库存管理</a></li>
+                    <li><a href="#" class="nav-link" data-page="expenses">💳 支出管理</a></li>
+                    <li><a href="#" class="nav-link" data-page="profit">📊 盈亏分析</a></li>
+                    <li><a href="#" class="nav-link" data-page="reports">📈 报表分析</a></li>
+                    <li><a href="#" class="nav-link" data-page="ai-analysis">🤖 AI智能分析</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 仪表盘页面 -->
+            <section id="dashboard" class="page active">
+                <h2>仪表盘</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>今日销售额</h3>
+                        <p class="stat-value" id="todaySales">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本月销售额</h3>
+                        <p class="stat-value" id="monthSales">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本月支出</h3>
+                        <p class="stat-value" id="monthExpenses">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本月利润</h3>
+                        <p class="stat-value" id="monthProfit">¥0</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </section>
+
+            <!-- 销售管理页面 -->
+            <section id="sales" class="page">
+                <h2>销售管理</h2>
+                <div class="form-card">
+                    <h3>添加销售记录</h3>
+                    <form id="salesForm">
+                        <div class="form-group">
+                            <label>产品名称</label>
+                            <select id="productName" required onchange="toggleCustomProduct()">
+                                <option value="">请选择产品</option>
+                                <option value="招牌菜A">招牌菜A</option>
+                                <option value="招牌菜B">招牌菜B</option>
+                                <option value="特色小吃">特色小吃</option>
+                                <option value="饮品">饮品</option>
+                                <option value="套餐">套餐</option>
+                                <option value="custom">➕ 自定义产品</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="customProductGroup" style="display: none;">
+                            <label>自定义产品名称</label>
+                            <input type="text" id="customProductName" placeholder="输入产品名称">
+                        </div>
+                        <div class="form-group">
+                            <label>单价（元）</label>
+                            <input type="number" id="productPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>数量</label>
+                            <input type="number" id="productQuantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>日期</label>
+                            <input type="date" id="saleDate" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">添加销售</button>
+                    </form>
+                </div>
+                <div class="table-card">
+                    <h3>销售记录</h3>
+                    <table id="salesTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>产品</th>
+                                <th>单价</th>
+                                <th>数量</th>
+                                <th>总额</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 库存管理页面 -->
+            <section id="inventory" class="page">
+                <h2>库存管理</h2>
+                <div class="form-card">
+                    <h3>添加库存记录</h3>
+                    <form id="inventoryForm">
+                        <div class="form-group">
+                            <label>原材料名称</label>
+                            <input type="text" id="materialName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>数量</label>
+                            <input type="number" id="materialQuantity" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>单位</label>
+                            <select id="materialUnit" required>
+                                <option value="kg">千克</option>
+                                <option value="g">克</option>
+                                <option value="L">升</option>
+                                <option value="ml">毫升</option>
+                                <option value="个">个</option>
+                                <option value="包">包</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>单价（元）</label>
+                            <input type="number" id="materialPrice" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">添加库存</button>
+                    </form>
+                </div>
+                <div class="table-card">
+                    <h3>库存列表</h3>
+                    <table id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>原材料</th>
+                                <th>数量</th>
+                                <th>单位</th>
+                                <th>单价</th>
+                                <th>总价</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 支出管理页面 -->
+            <section id="expenses" class="page">
+                <h2>支出管理</h2>
+                <div class="form-card">
+                    <h3>添加支出记录</h3>
+                    <form id="expenseForm">
+                        <div class="form-group">
+                            <label>支出类型</label>
+                            <select id="expenseType" required>
+                                <option value="">请选择类型</option>
+                                <option value="原材料">原材料</option>
+                                <option value="房租">房租</option>
+                                <option value="水电费">水电费</option>
+                                <option value="人工工资">人工工资</option>
+                                <option value="设备维修">设备维修</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>金额（元）</label>
+                            <input type="number" id="expenseAmount" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>日期</label>
+                            <input type="date" id="expenseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>备注</label>
+                            <input type="text" id="expenseNote" placeholder="选填">
+                        </div>
+                        <button type="submit" class="btn btn-primary">添加支出</button>
+                    </form>
+                </div>
+                <div class="table-card">
+                    <h3>支出记录</h3>
+                    <table id="expenseTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>类型</th>
+                                <th>金额</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 盈亏分析页面 -->
+            <section id="profit" class="page">
+                <h2>盈亏分析</h2>
+                
+                <!-- 成本设置 -->
+                <div class="form-card">
+                    <h3>成本设置</h3>
+                    <form id="costForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>月房租（元）</label>
+                                <input type="number" id="rentCost" step="0.01" placeholder="5000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>月人工成本（元）</label>
+                                <input type="number" id="laborCost" step="0.01" placeholder="8000" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>月水电费（元）</label>
+                                <input type="number" id="utilityCost" step="0.01" placeholder="1000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>其他固定成本（元/月）</label>
+                                <input type="number" id="otherCost" step="0.01" placeholder="500" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存成本设置</button>
+                    </form>
+                </div>
+
+                <!-- 产品成本设置 -->
+                <div class="form-card">
+                    <h3>产品成本配置</h3>
+                    <form id="productCostForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>产品名称</label>
+                                <select id="costProductName" required onchange="toggleCustomCostProduct()">
+                                    <option value="招牌菜A">招牌菜A</option>
+                                    <option value="招牌菜B">招牌菜B</option>
+                                    <option value="特色小吃">特色小吃</option>
+                                    <option value="饮品">饮品</option>
+                                    <option value="套餐">套餐</option>
+                                    <option value="custom">➕ 自定义产品</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="customCostProductGroup" style="display: none;">
+                                <label>自定义产品名称</label>
+                                <input type="text" id="customCostProductName" placeholder="输入产品名称">
+                            </div>
+                            <div class="form-group">
+                                <label>原材料成本（元）</label>
+                                <input type="number" id="materialCost" step="0.01" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">设置产品成本</button>
+                    </form>
+                    <div id="productCostList" class="cost-list"></div>
+                </div>
+
+                <!-- 盈亏分析报表 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>本月总收入</h3>
+                        <p class="stat-value" id="profitRevenue">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本月总成本</h3>
+                        <p class="stat-value" id="profitTotalCost">¥0</p>
+                        <small>固定成本: <span id="profitFixedCost">¥0</span></small><br>
+                        <small>变动成本: <span id="profitVariableCost">¥0</span></small>
+                    </div>
+                    <div class="stat-card">
+                        <h3>净利润</h3>
+                        <p class="stat-value" id="profitNet">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>利润率</h3>
+                        <p class="stat-value" id="profitMargin">0%</p>
+                    </div>
+                </div>
+
+                <!-- 产品利润分析 -->
+                <div class="table-card">
+                    <h3>产品利润分析</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>产品名称</th>
+                                <th>销量</th>
+                                <th>销售额</th>
+                                <th>成本</th>
+                                <th>毛利润</th>
+                                <th>毛利率</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productProfitTable"></tbody>
+                    </table>
+                </div>
+
+                <!-- 盈亏平衡分析 -->
+                <div class="form-card">
+                    <h3>盈亏平衡点分析</h3>
+                    <div class="breakeven-info">
+                        <p>平均售价: <strong id="avgPrice">¥0</strong></p>
+                        <p>平均成本: <strong id="avgCost">¥0</strong></p>
+                        <p>月固定成本: <strong id="monthlyFixed">¥0</strong></p>
+                        <p class="breakeven-result">
+                            需要销售 <strong id="breakevenQty">0</strong> 杯才能盈亏平衡
+                        </p>
+                        <p class="breakeven-result">
+                            需要营业额达到 <strong id="breakevenRevenue">¥0</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="profitTrendChart"></canvas>
+                </div>
+            </section>
+
+            <!-- 报表分析页面 -->
+            <section id="reports" class="page">
+                <h2>报表分析</h2>
+                <div class="report-filters">
+                    <label>选择月份：</label>
+                    <input type="month" id="reportMonth">
+                    <button class="btn btn-primary" onclick="generateReport()">生成报表</button>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>总销售额</h3>
+                        <p class="stat-value" id="reportSales">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>总支出</h3>
+                        <p class="stat-value" id="reportExpenses">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>净利润</h3>
+                        <p class="stat-value" id="reportProfit">¥0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>利润率</h3>
+                        <p class="stat-value" id="reportMargin">0%</p>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h3>产品销售分布</h3>
+                        <canvas id="productChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>支出类型分布</h3>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI智能分析页面 -->
+            <section id="ai-analysis" class="page">
+                <h2>🤖 AI智能分析</h2>
+                
+                <!-- AI配置 -->
+                <div class="form-card">
+                    <h3>AI配置</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>选择AI平台</label>
+                            <select id="aiProvider">
+                                <option value="openai">OpenAI (ChatGPT)</option>
+                                <option value="tongyi">阿里通义千问</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="deepseek">DeepSeek</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" id="aiApiKey" placeholder="输入您的API Key">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveAIConfig()">保存配置</button>
+                    <small style="color: #666; margin-top: 10px; display: block;">
+                        提示：API Key仅保存在本地浏览器，不会上传到任何服务器
+                    </small>
+                </div>
+
+                <!-- AI分析选项 -->
+                <div class="ai-options">
+                    <div class="ai-option-card" onclick="analyzeWithAI('business')">
+                        <div class="ai-icon">📈</div>
+                        <h3>经营分析</h3>
+                        <p>分析整体经营状况，提供改进建议</p>
+                    </div>
+                    <div class="ai-option-card" onclick="analyzeWithAI('sales')">
+                        <div class="ai-icon">💰</div>
+                        <h3>销售趋势</h3>
+                        <p>预测销售趋势，推荐营销策略</p>
+                    </div>
+                    <div class="ai-option-card" onclick="analyzeWithAI('cost')">
+                        <div class="ai-icon">💳</div>
+                        <h3>成本优化</h3>
+                        <p>识别成本高的环节，提供节约方案</p>
+                    </div>
+                    <div class="ai-option-card" onclick="analyzeWithAI('inventory')">
+                        <div class="ai-icon">📦</div>
+                        <h3>库存建议</h3>
+                        <p>智能库存管理，减少浪费</p>
+                    </div>
+                    <div class="ai-option-card" onclick="analyzeWithAI('profit')">
+                        <div class="ai-icon">📊</div>
+                        <h3>盈利分析</h3>
+                        <p>深度盈利分析，找出增长点</p>
+                    </div>
+                    <div class="ai-option-card" onclick="analyzeWithAI('custom')">
+                        <div class="ai-icon">💬</div>
+                        <h3>自定义问题</h3>
+                        <p>向AI提出您的具体问题</p>
+                    </div>
+                </div>
+
+                <!-- 自定义问题输入 -->
+                <div id="customQuestionBox" class="form-card" style="display: none;">
+                    <h3>向AI提问</h3>
+                    <textarea id="customQuestion" rows="4" placeholder="例如：如何提高招牌菜的销量？" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                    <button class="btn btn-primary" onclick="askCustomQuestion()" style="margin-top: 10px;">提交问题</button>
+                </div>
+
+                <!-- AI分析结果 -->
+                <div id="aiResultCard" class="ai-result-card" style="display: none;">
+                    <div class="ai-result-header">
+                        <h3>💡 AI分析结果</h3>
+                        <button class="btn" onclick="closeAIResult()">关闭</button>
+                    </div>
+                    <div id="aiResultContent" class="ai-result-content">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>AI正在分析中，请稍候...</p>
+                        </div>
+                    </div>
+                    <div class="ai-result-footer">
+                        <button class="btn btn-primary" onclick="copyAIResult()">📋 复制结果</button>
+                        <button class="btn" onclick="exportAIResult()">💾 导出文本</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 多语言和货币支持（需要先加载） -->
+    <script src="js/i18n.js"></script>
+    <script src="js/currency.js"></script>
+    <script src="js/i18n-patch.js"></script>
+    
+    <!-- 核心功能脚本 -->
+    <script src="js/app.js"></script>
+    <script src="js/profitAnalysis.js"></script>
+    <script src="js/aiAnalysis.js"></script>
+</body>
+</html>
+
